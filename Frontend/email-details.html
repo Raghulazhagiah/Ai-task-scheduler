@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Details</title>
+    <style>
+        body {
+    background-image: url('sky.jpg'); /* If in the same directory */
+    /* Or, if in an 'images' folder: */
+    /* background-image: url('images/earth.jpg'); */
+    
+    background-size: cover; /* Makes the image cover the entire page */
+    background-position: center; /* Centers the image */
+    background-repeat: no-repeat; /* Prevents the image from repeating */
+    height: 100vh;
+    margin: 0;
+    display: flex; /* Enable Flexbox */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    font-family: Arial, sans-serif;
+}
+
+#email-details-container {
+    background-color: transparent; /* Fully transparent */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+    width: 100%;
+    color: white; /* Optional: Change text color to white for contrast */
+}
+
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #333;
+        }
+
+        p {
+            margin: 10px 0;
+            font-size: 16px;
+        }
+
+        strong {
+            color: #0a0a0a;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+            resize: none;
+        }
+
+        button {
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div id="email-details-container">
+        <h1>Email Details</h1>
+        <div id="email-details">
+            <p><strong>Sender:</strong> <span id="sender"></span></p>
+            <p><strong>Receiver:</strong> <span id="receiver"></span></p>
+            <p><strong>Subject:</strong> <span id="subject"></span></p>
+            <p><strong>Message:</strong></p>
+            <textarea id="message" rows="10" cols="50"></textarea>
+        </div>
+        <button id="send-mail">Send Mail</button>
+    </div>
+
+    <script>
+        // Function to fetch email details and populate the form
+        function loadEmailDetails() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const taskId = urlParams.get('taskId');
+
+            fetch(`http://localhost:8082/get-email-details/${taskId}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('sender').textContent = data.receiver;
+                    document.getElementById('receiver').textContent = data.sender;
+                    document.getElementById('subject').textContent = data.subject;
+                    document.getElementById('message').value = data.response;
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Event listener for the send mail button
+        document.getElementById('send-mail').onclick = function() {
+            const message = document.getElementById('message').value;
+            const urlParams = new URLSearchParams(window.location.search);
+            const taskId = urlParams.get('taskId');
+
+            fetch(`http://localhost:8082/send-email/${taskId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(`Email sent`, data);
+                alert('Email sent successfully!');
+            })
+            .catch(error => console.error('Error:', error));
+        };
+
+        // Load email details when the page loads
+        window.onload = loadEmailDetails;
+    </script>
+</body>
+</html>
